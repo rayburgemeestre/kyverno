@@ -1,6 +1,8 @@
 package match
 
 import (
+	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/exp/slices"
 	authenticationv1 "k8s.io/api/authentication/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -30,6 +32,12 @@ func CheckSubjects(
 			}
 		case "User", "Group":
 			if slices.Contains(userGroups, subject.Name) {
+				fmt.Println("DEBUG -- subject.Name matched: ", subject.Name, "with userGroups: ", userGroups)
+				// pretty print ruleSubjects with indentation
+				spew.Dump(ruleSubjects)
+				spew.Dump(excludeGroupRole)
+				spew.Dump(userInfo)
+				spew.Dump(userGroups)
 				return true
 			}
 		}

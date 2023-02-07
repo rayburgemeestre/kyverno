@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-logr/logr"
 	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
 	kyvernov1beta1 "github.com/kyverno/kyverno/api/kyverno/v1beta1"
@@ -191,6 +192,18 @@ func MatchesResourceDescription(subresourceGVKToAPIResource map[string]*metav1.A
 		return fmt.Errorf(" The policy and resource namespace are different. Therefore, policy skip this resource.")
 	}
 
+	fmt.Println("DEBUG -- Processing rule: ", rule.Name)
+	spew.Dump(rule)
+	spew.Dump(admissionInfo)
+	spew.Dump(dynamicConfig)
+
+	matched := false
+	defer func() {
+		if !matched {
+			fmt.Println("DEBUG -- Rule", rule.Name, " did not match")
+		}
+	}()
+
 	if len(rule.MatchResources.Any) > 0 {
 		// include object if ANY of the criteria match
 		// so if one matches then break from loop
@@ -250,6 +263,9 @@ func MatchesResourceDescription(subresourceGVKToAPIResource map[string]*metav1.A
 	if len(reasonsForFailure) > 0 {
 		return fmt.Errorf(errorMessage)
 	}
+
+	fmt.Println("DEBUG -- Rule", rule.Name, "matched!")
+	matched = true // avoid defer to print as well
 
 	return nil
 }
